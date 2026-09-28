@@ -2,6 +2,7 @@ package dryer
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/wyw14/solo-038/internal/model"
@@ -16,6 +17,9 @@ type IntervalProof struct {
 func BuildProof(job model.Job, interval model.Interval, temperature, airflow float64, now time.Time) (IntervalProof, error) {
 	if err := interval.Validate(); err != nil {
 		return IntervalProof{}, err
+	}
+	if math.IsNaN(temperature) || math.IsInf(temperature, 0) || math.IsNaN(airflow) || math.IsInf(airflow, 0) {
+		return IntervalProof{}, fmt.Errorf("dryer temperature and airflow proof are invalid")
 	}
 	if temperature <= 0 || airflow <= 0 {
 		return IntervalProof{}, fmt.Errorf("dryer temperature and airflow proof are required")
