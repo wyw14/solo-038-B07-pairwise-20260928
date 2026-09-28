@@ -2,6 +2,7 @@ package dryer
 
 import (
 	"fmt"
+	"math"
 	"sort"
 )
 
@@ -22,7 +23,7 @@ func (profile Profile) Validate() error {
 	}
 	seen := map[string]bool{}
 	for _, zone := range profile.Zones {
-		if zone.Name == "" || zone.Temperature < 0 || zone.Airflow < 0 || seen[zone.Name] {
+		if zone.Name == "" || math.IsNaN(zone.Temperature) || math.IsInf(zone.Temperature, 0) || zone.Temperature < 0 || math.IsNaN(zone.Airflow) || math.IsInf(zone.Airflow, 0) || zone.Airflow < 0 || seen[zone.Name] {
 			return fmt.Errorf("dryer profile zone is invalid")
 		}
 		seen[zone.Name] = true

@@ -3,6 +3,7 @@ package dryer
 import (
 	"context"
 	"fmt"
+	"math"
 	"sync"
 	"time"
 )
@@ -23,7 +24,7 @@ func NewState() *State {
 }
 
 func (state *State) Start(jobID string, generation uint64, target float64, profile string, now time.Time) error {
-	if jobID == "" || generation == 0 || target < 0 || profile == "" {
+	if jobID == "" || generation == 0 || target < 0 || math.IsNaN(target) || math.IsInf(target, 0) || profile == "" {
 		return fmt.Errorf("dryer start parameters are incomplete")
 	}
 	state.mu.Lock()
@@ -49,6 +50,9 @@ func (state *State) Cancel(jobID string, generation uint64) bool {
 }
 
 func (state *State) Apply(jobID string, generation uint64, temperature float64, now time.Time) error {
+	if math.IsNaN(temperature) || math.IsInf(temperature, 0) {
+		return fmt.Errorf("dryer temperature reading is invalid")
+	}
 	state.mu.Lock()
 	defer state.mu.Unlock()
 	if !state.active || state.jobID != jobID || state.jobGen != generation {
